@@ -50,7 +50,7 @@ class TreeSystem {
 
     generateTree(x, baseY, z) {
         const trunkHeight = 3 + Math.floor(Math.random() * 2); // 3-4 blocks tall
-        this.treeLocations.push({x, y: baseY, z});
+        this.treeLocations.push({x, y: baseY, z, trunkHeight});
 
         // Generate trunk
         for (let y = 0; y < trunkHeight; y++) {
@@ -127,9 +127,99 @@ class TreeSystem {
         gl.bufferData(gl.ARRAY_BUFFER, this.leavesUVBufferData, gl.STATIC_DRAW);
     }
 
-    render(gl, a_Position, a_UV, u_whichTexture) {
+    render(gl, a_Position, a_UV, a_Normal, u_whichTexture) {
+        // Generate normals for tree trunks (pointing outward)
+        const trunkNormals = new Float32Array(this.trunkBufferData.length);
+        for (let i = 0; i < trunkNormals.length; i += 9) {
+            // Simple approach - each face has appropriate normal
+            // Front face (z+) normals
+            if ((i % 36) < 18) {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = 0;
+                    trunkNormals[i + j*3 + 1] = 0;
+                    trunkNormals[i + j*3 + 2] = 1;
+                }
+            }
+            // Back face (z-) normals
+            else if ((i % 36) < 36 && (i % 36) >= 18) {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = 0;
+                    trunkNormals[i + j*3 + 1] = 0;
+                    trunkNormals[i + j*3 + 2] = -1;
+                }
+            }
+            // Top face (y+) normals
+            else if ((i % 36) >= 36 && (i % 36) < 54) {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = 0;
+                    trunkNormals[i + j*3 + 1] = 1;
+                    trunkNormals[i + j*3 + 2] = 0;
+                }
+            }
+            // Bottom face (y-) normals
+            else if ((i % 36) >= 54 && (i % 36) < 72) {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = 0;
+                    trunkNormals[i + j*3 + 1] = -1;
+                    trunkNormals[i + j*3 + 2] = 0;
+                }
+            }
+            // Right face (x+) normals
+            else if ((i % 36) >= 72 && (i % 36) < 90) {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = 1;
+                    trunkNormals[i + j*3 + 1] = 0;
+                    trunkNormals[i + j*3 + 2] = 0;
+                }
+            }
+            // Left face (x-) normals
+            else {
+                for (let j = 0; j < 3; j++) {
+                    trunkNormals[i + j*3] = -1;
+                    trunkNormals[i + j*3 + 1] = 0;
+                    trunkNormals[i + j*3 + 2] = 0;
+                }
+            }
+        }
+        
+        // Generate normals for leaves (spherical)
+        const leavesNormals = new Float32Array(this.leavesBufferData.length);
+        for (let i = 0; i < leavesNormals.length; i += 9) {
+            // For leaves, we'll try to create a more spherical appearance
+            // by having normals point outward from the center of the leaf block
+            for (let j = 0; j < 3; j++) {
+                const vx = this.leavesBufferData[i + j*3];
+                const vy = this.leavesBufferData[i + j*3 + 1];
+                const vz = this.leavesBufferData[i + j*3 + 2];
+                
+                // Find the center of the current leaf block
+                const cx = Math.floor(vx) + 0.5;
+                const cy = Math.floor(vy) + 0.5;
+                const cz = Math.floor(vz) + 0.5;
+                
+                // Calculate direction from center
+                let nx = vx - cx;
+                let ny = vy - cy;
+                let nz = vz - cz;
+                
+                // Normalize
+                const len = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+                leavesNormals[i + j*3] = nx / len;
+                leavesNormals[i + j*3 + 1] = ny / len;
+                leavesNormals[i + j*3 + 2] = nz / len;
+            }
+        }
+        
         // Draw tree trunks
         gl.uniform1i(u_whichTexture, 3); // Assuming texture 3 is wood
+        
+        // Create normal buffer for trunks
+        let normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, trunkNormals, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Normal);
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, this.trunkVertexBuffer);
         gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.trunkUVBuffer);
@@ -138,6 +228,12 @@ class TreeSystem {
 
         // Draw leaves
         gl.uniform1i(u_whichTexture, 4); // Assuming texture 4 is leaves
+        
+        // Create normal buffer for leaves
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, leavesNormals, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, this.leavesVertexBuffer);
         gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.leavesUVBuffer);

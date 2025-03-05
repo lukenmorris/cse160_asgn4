@@ -109,6 +109,17 @@
             Movement: W,A,S,D | Rotation: Q,E or Mouse<br>
             Left Click: Place Block | Right Click: Remove Block
         </p>
+        
+        <!-- Lighting controls -->
+        <div id="lighting-controls">
+            <button id="toggleLighting">Turn Off Lighting</button>
+            <button id="toggleNormals">Show Normals</button>
+            <button id="toggleSpotlight">Turn On Spotlight</button>
+            <div style="margin-top: 10px;">
+                <label>Light Color: </label>
+                <input type="color" id="lightColor" value="#ffffff">
+            </div>
+        </div>
     </div>
 
     <!-- Instructions -->
@@ -120,20 +131,22 @@
             <li>Left click to place a block</li>
             <li>Right click to remove a block</li>
             <li>Navigate carefully - you can't go through walls!</li>
+            <li>Toggle lighting on/off with the lighting button</li>
+            <li>Toggle normal visualization for debugging</li>
+            <li>Toggle spotlight to see directional lighting effects</li>
         </ul>
     </div>
 
-    <!-- Include WebGL utility scripts -->
     <script src="lib/cuon-matrix.js"></script>
     <script src="lib/cuon-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/webgl-utils.js"></script>
 
-    <!-- Include our implementation files -->
     <script src="FPSCounter.js"></script>
     <script src="Camera.js"></script>
     <script src="Triangle.js"></script>
     <script src="Cube.js"></script>
+    <script src="Sphere.js"></script>
     <script src="World.js"></script>
     <script src="perlin.js"></script>
     <script src="TreeSystem.js"></script>

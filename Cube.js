@@ -48,6 +48,28 @@ class Cube {
             0.0, 0.0,   1.0, 0.0,   1.0, 1.0,
             0.0, 0.0,   1.0, 1.0,   0.0, 1.0,
         ]);
+        
+        // Add normals for each vertex (one normal per face, repeated for each vertex of that face)
+        this.normals = new Float32Array([
+            // Front face - normal (0, 0, 1)
+             0.0,  0.0,  1.0,    0.0,  0.0,  1.0,    0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0,    0.0,  0.0,  1.0,    0.0,  0.0,  1.0,
+            // Back face - normal (0, 0, -1)
+             0.0,  0.0, -1.0,    0.0,  0.0, -1.0,    0.0,  0.0, -1.0,
+             0.0,  0.0, -1.0,    0.0,  0.0, -1.0,    0.0,  0.0, -1.0,
+            // Top face - normal (0, 1, 0)
+             0.0,  1.0,  0.0,    0.0,  1.0,  0.0,    0.0,  1.0,  0.0,
+             0.0,  1.0,  0.0,    0.0,  1.0,  0.0,    0.0,  1.0,  0.0,
+            // Bottom face - normal (0, -1, 0)
+             0.0, -1.0,  0.0,    0.0, -1.0,  0.0,    0.0, -1.0,  0.0,
+             0.0, -1.0,  0.0,    0.0, -1.0,  0.0,    0.0, -1.0,  0.0,
+            // Right face - normal (1, 0, 0)
+             1.0,  0.0,  0.0,    1.0,  0.0,  0.0,    1.0,  0.0,  0.0,
+             1.0,  0.0,  0.0,    1.0,  0.0,  0.0,    1.0,  0.0,  0.0,
+            // Left face - normal (-1, 0, 0)
+            -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0
+        ]);
     }
 
     render() {
@@ -62,21 +84,20 @@ class Cube {
 
         // Create and set up vertex buffer
         let vertexBuffer = gl.createBuffer();
-        if (!vertexBuffer) {
-            console.log('Failed to create vertex buffer');
-            return -1;
-        }
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
         gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(a_Position);
 
+        // Create and set up normal buffer
+        let normalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Normal);
+
         // Create and set up UV buffer
         let uvBuffer = gl.createBuffer();
-        if (!uvBuffer) {
-            console.log('Failed to create UV buffer');
-            return -1;
-        }
         gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.uvCoords, gl.STATIC_DRAW);
         gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
