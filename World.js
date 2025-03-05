@@ -449,24 +449,8 @@ function initializeLighting() {
     g_demoSphere.matrix.translate(0, 3, 0); // Position it above ground
 }
 
-function addLightingControls() {
-    // Create lighting controls container
-    const controlsDiv = document.getElementById('controls');
-    
-    // Add lighting toggle
-    const lightingToggle = document.createElement('div');
-    lightingToggle.innerHTML = `
-        <button id="toggleLighting">Toggle Lighting</button>
-        <button id="toggleNormals">Show Normals</button>
-        <button id="toggleSpotlight">Toggle Spotlight</button>
-        <div style="margin-top: 10px;">
-            <label>Light Color: </label>
-            <input type="color" id="lightColor" value="#ffffff">
-        </div>
-    `;
-    controlsDiv.appendChild(lightingToggle);
-    
-    // Add event listeners
+function setupLightingEventListeners() {
+    // Add event listeners for the static controls
     document.getElementById('toggleLighting').addEventListener('click', function() {
         g_lightingEnabled = !g_lightingEnabled;
         this.textContent = g_lightingEnabled ? 'Turn Off Lighting' : 'Turn On Lighting';
@@ -848,7 +832,7 @@ function main() {
 
     // Initialize lighting
     initializeLighting();
-    addLightingControls();
+    setupLightingEventListeners()
 
     initMouseControls();
     document.onkeydown = keydown;
